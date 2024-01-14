@@ -58,7 +58,7 @@ export const Main = () => {
 
 const ProductsListUl = styled.ul`
   width: 100%;
-  margin-top: 5rem;
+  margin: 5rem 0;
   .my-masonry-grid {
     display: flex;
     margin: 0 auto;
