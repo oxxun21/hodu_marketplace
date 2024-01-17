@@ -21,7 +21,7 @@ export const Header = () => {
           <img src={cart_icon} alt="장바구니 아이콘" />
           장바구니
         </Link>
-        <Link to="/">
+        <Link to="/signin">
           <img src={user_icon} alt="로그인 아이콘" />
           로그인
         </Link>
