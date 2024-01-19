@@ -6,6 +6,6 @@ export const signinAPI = async (userInfo: SignIn_I) => {
     const response = await instance.post("/accounts/login/", userInfo);
     return response;
   } catch (error) {
-    throw error;
+    return error;
   }
 };
