@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import React from "react";
 
 interface Card_I {
   image: string;
@@ -11,10 +10,7 @@ interface Card_I {
 export default function Card({ image, store_name, product_name, price }: Card_I) {
   return (
     <CardLi>
-      <CardPicture>
-        <source srcSet={image} type="image/webp" />
-        <img src={image} alt={`${product_name}의 상품 사진`} />
-      </CardPicture>
+      <img src={image} alt={`${product_name}의 상품 사진`} />
       <p>{store_name}</p>
       <strong>{product_name}</strong>
       <p>
@@ -25,11 +21,10 @@ export default function Card({ image, store_name, product_name, price }: Card_I)
 }
 
 const CardLi = styled.li`
-  width: 25%;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  & p {
+  & > p {
     font-size: 1rem;
     &:first-of-type {
       color: #767676;
@@ -39,15 +34,10 @@ const CardLi = styled.li`
       font-weight: 700;
     }
   }
-
-  & strong {
+  & > strong {
     font-size: 1.125rem;
   }
-`;
-
-const CardPicture = styled.picture`
-  margin-bottom: 6px;
-  & img {
+  & > img {
     width: 100%;
     height: 100%;
   }
