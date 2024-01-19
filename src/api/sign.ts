@@ -3,7 +3,7 @@ import { instance } from "./instance";
 
 export const signinAPI = async (userInfo: SignIn_I) => {
   try {
-    const response = await instance.post("/accounts/login", userInfo);
+    const response = await instance.post("/accounts/login/", userInfo);
     return response;
   } catch (error) {
     throw error;

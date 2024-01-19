@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import logo from "../assets/Logo-hodu.svg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "@emotion/styled";
-import useDebounce from "../components/hook/useDebounce";
 import { signinAPI } from "../api/sign";
 import { getLoginCookie, setLoginCookie } from "../utils/loginCookie";
 import { instance } from "../api/instance";
@@ -18,26 +17,26 @@ export const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginType, setLoginType] = useState("BUYER");
+  const navigate = useNavigate();
 
   const handleButtonClick = (buttonType: string) => {
     setLoginType(buttonType);
   };
 
-  const debouncedUsername = useDebounce(username, 20);
-  const debouncedPassword = useDebounce(password, 20);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await signinAPI({ username, password, login_type: loginType });
+    const response = await signinAPI({
+      username,
+      password,
+      login_type: loginType,
+    });
     console.log(response);
 
-    // const { token } = response;
-    // setLoginCookie(token, { path: "/" });
+    const { token } = response.data;
+    setLoginCookie(token, { path: "/" });
 
-    // console.log(interceptorHeader());
-    // navigate("/");
-
-    // console.log("Logging in with:", debouncedUsername, debouncedPassword, loginType);
+    interceptorHeader();
+    navigate("/");
   };
 
   return (
