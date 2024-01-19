@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import logo from "../assets/Logo-hodu.svg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "@emotion/styled";
-import useDebounce from "../components/hook/useDebounce";
 import { signinAPI } from "../api/sign";
 import { getLoginCookie, setLoginCookie } from "../utils/loginCookie";
 import { instance } from "../api/instance";
@@ -18,26 +17,29 @@ export const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginType, setLoginType] = useState("BUYER");
+  const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
 
   const handleButtonClick = (buttonType: string) => {
     setLoginType(buttonType);
   };
 
-  const debouncedUsername = useDebounce(username, 20);
-  const debouncedPassword = useDebounce(password, 20);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await signinAPI({ username, password, login_type: loginType });
-    console.log(response);
+    const response = await signinAPI({
+      username,
+      password,
+      login_type: loginType,
+    });
 
-    // const { token } = response;
-    // setLoginCookie(token, { path: "/" });
-
-    // console.log(interceptorHeader());
-    // navigate("/");
-
-    // console.log("Logging in with:", debouncedUsername, debouncedPassword, loginType);
+    if ((response as any).status !== 200) {
+      setErrorMsg((response as any).response.data.FAIL_Message);
+    } else {
+      const { token } = (response as any).data;
+      setLoginCookie(token, { path: "/" });
+      interceptorHeader();
+      navigate("/");
+    }
   };
 
   return (
@@ -45,7 +47,7 @@ export const SignIn = () => {
       <h1>
         <img src={logo} alt="HODU 로고" />
       </h1>
-      <Contain>
+      <SignFormContain>
         <SigninButtonBox>
           <button onClick={() => handleButtonClick("BUYER")} className={loginType === "BUYER" ? "active" : ""}>
             구매회원 로그인
@@ -73,9 +75,10 @@ export const SignIn = () => {
               required
             />
           </label>
+          <SigninError>{errorMsg}</SigninError>
           <button>로그인</button>
         </SignInInputBox>
-      </Contain>
+      </SignFormContain>
       <SignInOther>
         <li>
           <Link to="/signup">회원가입</Link>
@@ -99,7 +102,7 @@ const SignInMain = styled.main`
     }
   }
 `;
-const Contain = styled.div`
+const SignFormContain = styled.div`
   position: relative;
 `;
 
@@ -135,7 +138,7 @@ const SignInInputBox = styled.form`
 
   & input {
     width: 100%;
-    font-family: "Wanted Sans";
+    font-family: inherit;
     padding: 18px 0;
     font-size: 1rem;
     border: none;
@@ -146,13 +149,12 @@ const SignInInputBox = styled.form`
   }
 
   & > button {
-    margin-top: 30px;
     border-radius: 5px;
     border: none;
     padding: 20px 0;
     font-size: 1.125rem;
     font-weight: 600;
-    font-family: "Wanted Sans";
+    font-family: inherit;
     cursor: pointer;
   }
 `;
@@ -181,4 +183,10 @@ const SignInOther = styled.ul`
     width: 1px;
     height: 100%;
   }
+`;
+
+const SigninError = styled.p`
+  margin: 1.625rem 0 0.25rem;
+  color: #ff0000;
+  font-size: 0.875rem;
 `;
