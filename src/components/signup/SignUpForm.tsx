@@ -1,62 +1,194 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
+import icon_password from "../../assets/icon-check-off.svg";
+import icon_password_ok from "../../assets/icon-check-on.svg";
+import { signupBuyerAPI, signupSellerAPI } from "../../api/sign";
+import { useNavigate } from "react-router-dom";
 
 export const SignUpForm = ({ loginType }: { loginType: string }) => {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordCheck, setPasswordCheck] = useState("");
+  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [companyRegistrationNumber, setCompanyRegistrationNumber] = useState("");
+  const [storeName, setStoreName] = useState("");
+  const [isCheckboxChecked, setIsCheckboxChecked] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const validatePassword = (password: string): boolean => {
+    const passwordRegexp = /^(?=.*[a-z])(?=.*\d)[a-z\d]{8,}$/i;
+    const regResult = !password.search(passwordRegexp);
+    return !regResult || password === "";
+  };
+
+  const validatePasswordCheck = (passwordCheck: string): boolean => {
+    return password !== passwordCheck || passwordCheck === "";
+  };
+
+  useEffect(() => {
+    if (
+      username &&
+      !validatePassword(password) &&
+      !validatePasswordCheck(passwordCheck) &&
+      name &&
+      phoneNumber &&
+      isCheckboxChecked &&
+      (loginType === "BUYER" || (companyRegistrationNumber && storeName))
+    ) {
+      setIsFormValid(true);
+    } else {
+      setIsFormValid(false);
+    }
+  }, [
+    username,
+    password,
+    passwordCheck,
+    name,
+    phoneNumber,
+    isCheckboxChecked,
+    companyRegistrationNumber,
+    storeName,
+    loginType,
+  ]);
+
+  const handleResponse = async (response: any) => {
+    if (response.status === 201) {
+      navigate("/signin");
+    } else {
+      if (response.response.data) {
+        for (const key in response.response.data) {
+          setErrorMsg(`※ ${key}: ${response.response.data[key]}`);
+        }
+      }
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    let response;
+    const userInfo = {
+      username,
+      password,
+      password2: passwordCheck,
+      phone_number: phoneNumber,
+      name,
+    };
+    if (loginType === "BUYER") {
+      response = await signupBuyerAPI(userInfo);
+    } else if (loginType === "SELLER") {
+      response = await signupSellerAPI({
+        ...userInfo,
+        company_registration_number: companyRegistrationNumber,
+        store_name: storeName,
+      });
+    }
+
+    if (response) {
+      await handleResponse(response);
+    }
+  };
+
   return (
-    <>
-      <SignUpInputForm>
+    <SignUpInputForm onSubmit={handleSignUp}>
+      <SignUpInputBox>
+        <NeedToChackBox>
+          <label htmlFor="id">
+            아이디
+            <input
+              type="text"
+              id="id"
+              required
+              placeholder="20자 이내의 영어 소문자, 대문자, 숫자만 가능"
+              onChange={e => setUsername(e.target.value)}
+            />
+          </label>
+          <button>중복확인</button>
+        </NeedToChackBox>
+        <label htmlFor="password">
+          비밀번호
+          <input
+            type="password"
+            id="password"
+            className={validatePassword(password) ? "passwordNotOk" : "passwordOk"}
+            required
+            onChange={e => setPassword(e.target.value)}
+            placeholder="8자 이상의 영소문자 및 숫자 필수"
+          />
+        </label>
+        <label htmlFor="password_check">
+          비밀번호 재확인
+          <input
+            type="password"
+            id="password_check"
+            className={validatePasswordCheck(passwordCheck) ? "passwordNotOk" : "passwordOk"}
+            required
+            onChange={e => setPasswordCheck(e.target.value)}
+            placeholder="비밀번호를 다시 입력해주세요."
+          />
+        </label>
+      </SignUpInputBox>
+      <SignUpInputBox>
+        <label htmlFor="name">
+          이름
+          <input
+            type="text"
+            id="name"
+            required
+            placeholder="이름을 입력해주세요."
+            onChange={e => setName(e.target.value)}
+          />
+        </label>
+        <label htmlFor="phoneNumber">
+          휴대폰번호
+          <input
+            type="phone"
+            id="phoneNumber"
+            required
+            placeholder="하이픈(-) 제외, 숫자만 입력"
+            onChange={e => setPhoneNumber(e.target.value)}
+          />
+        </label>
+      </SignUpInputBox>
+      {loginType === "SELLER" && (
         <SignUpInputBox>
           <NeedToChackBox>
-            <label htmlFor="id">
-              아이디
-              <input type="text" id="id" required />
+            <label htmlFor="storeNum">
+              사업자 등록번호
+              <input
+                type="text"
+                id="storeNum"
+                required
+                placeholder="사업자 등록번호를 입력해주세요."
+                onChange={e => setCompanyRegistrationNumber(e.target.value)}
+              />
             </label>
-            <button>중복확인</button>
+            <button>인증</button>
           </NeedToChackBox>
-          <label htmlFor="password">
-            비밀번호
-            <input type="password" id="password" required />
-          </label>
-          <label htmlFor="password_check">
-            비밀번호 재확인
-            <input type="password" id="password_check" required />
-          </label>
-        </SignUpInputBox>
-        <SignUpInputBox>
-          <label htmlFor="name">
-            이름
-            <input type="text" id="name" required />
-          </label>
-          <label htmlFor="phoneNumber">
-            휴대폰번호
-            <input type="phone" id="phoneNumber" required placeholder="숫자만 입력해주세요." />
+          <label htmlFor="storeName">
+            스토어 이름
+            <input
+              type="text"
+              id="storeName"
+              required
+              placeholder="상호명을 입력해주세요."
+              onChange={e => setStoreName(e.target.value)}
+            />
           </label>
         </SignUpInputBox>
-        {loginType === "SELLER" && (
-          <SignUpInputBox>
-            <NeedToChackBox>
-              <label htmlFor="storeNum">
-                사업자 등록번호
-                <input type="text" id="storeNum" required />
-              </label>
-              <button>인증</button>
-            </NeedToChackBox>
-            <label htmlFor="storeName">
-              스토어 이름
-              <input type="text" id="storeName" required />
-            </label>
-          </SignUpInputBox>
-        )}
-      </SignUpInputForm>
+      )}
+      {errorMsg && <SignupError>{errorMsg}</SignupError>}
       <AgreeBox>
-        <input type="checkbox" id="check" />
+        <input type="checkbox" id="check" onChange={e => setIsCheckboxChecked(e.target.checked)} />
         <label htmlFor="check" />
         <span>
           호두샵의 <a href="#">이용약관</a> 및 <a href="#">개인정보처리방침</a>에 대한 내용을 확인하였고 동의합니다.
         </span>
-        <button>가입하기</button>
+        <button disabled={!isFormValid}>가입하기</button>
       </AgreeBox>
-    </>
+    </SignUpInputForm>
   );
 };
 
@@ -67,7 +199,8 @@ const SignUpInputForm = styled.form`
   border-radius: 5px;
   display: flex;
   flex-direction: column;
-  gap: 50px;
+  gap: 30px;
+  margin-bottom: 6.875rem;
 `;
 
 const SignUpInputBox = styled.div`
@@ -87,6 +220,7 @@ const SignUpInputBox = styled.div`
     font-size: 1rem;
     border: 1px solid #c4c4c4;
     border-radius: 5px;
+
     &:focus {
       outline: 1px solid #d87739;
     }
@@ -94,13 +228,18 @@ const SignUpInputBox = styled.div`
       font-size: 0.875rem;
       color: #c4c4c4;
     }
+    &.passwordOk {
+      background: url(${icon_password_ok}) no-repeat;
+      background-position: bottom 50% right 16px;
+    }
+    &.passwordNotOk {
+      background: url(${icon_password}) no-repeat;
+      background-position: bottom 50% right 16px;
+    }
   }
 `;
 
 const AgreeBox = styled.div`
-  margin: 2rem 0 6.875rem;
-  padding: 0 2rem;
-
   & > span {
     color: #c4c4c4;
     font-size: 0.875rem;
@@ -145,6 +284,7 @@ const AgreeBox = styled.div`
     padding: 1.5rem 0;
     font-weight: 600;
     &:disabled {
+      cursor: default;
       color: #fff;
       background-color: #c4c4c4;
     }
@@ -164,4 +304,9 @@ const NeedToChackBox = styled.div`
     font-size: 0.875rem;
     margin: 26px 0 16px 0;
   }
+`;
+
+const SignupError = styled.p`
+  color: #ff0000;
+  font-size: 0.875rem;
 `;
