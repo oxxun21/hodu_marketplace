@@ -139,7 +139,8 @@ const SignInInputBox = styled.form`
   & input {
     width: 100%;
     font-family: inherit;
-    padding: 18px 0;
+    padding: 18px 16px;
+    box-sizing: border-box;
     font-size: 1rem;
     border: none;
     border-bottom: 1px solid #c4c4c4;

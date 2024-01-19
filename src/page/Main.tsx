@@ -32,31 +32,33 @@ export const Main = () => {
     <Layout>
       <Banner />
       {productList === null || productList.length === 0 ? null : (
-        <ProductsListUl>
-          <Masonry
-            breakpointCols={breakpointMasonryObj}
-            className="my-masonry-grid"
-            columnClassName="my-masonry-grid_column"
-          >
-            {productList.map(product => {
-              return (
-                <Card
-                  key={product.product_id}
-                  image={product.image}
-                  store_name={product.store_name}
-                  product_name={product.product_name}
-                  price={product.price}
-                />
-              );
-            })}
-          </Masonry>
-        </ProductsListUl>
+        <ProductsListSection>
+          <ul>
+            <Masonry
+              breakpointCols={breakpointMasonryObj}
+              className="my-masonry-grid"
+              columnClassName="my-masonry-grid_column"
+            >
+              {productList.map(product => {
+                return (
+                  <Card
+                    key={product.product_id}
+                    image={product.image}
+                    store_name={product.store_name}
+                    product_name={product.product_name}
+                    price={product.price}
+                  />
+                );
+              })}
+            </Masonry>
+          </ul>
+        </ProductsListSection>
       )}
     </Layout>
   );
 };
 
-const ProductsListUl = styled.ul`
+const ProductsListSection = styled.section`
   width: 100%;
   margin: 5rem 0;
   .my-masonry-grid {
