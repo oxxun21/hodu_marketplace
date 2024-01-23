@@ -27,3 +27,23 @@ export const signupSellerAPI = async (userInfo: SignUpSeller_I) => {
     return error;
   }
 };
+
+export const usernameValid = async (username: string) => {
+  try {
+    const response = await unauthInstance.post("/accounts/signup/valid/username/", { username: username });
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
+
+export const companyRegistrationNumberValid = async (companyRegistrationNumber: string) => {
+  try {
+    const response = await unauthInstance.post("/accounts/signup/valid/company_registration_number/", {
+      company_registration_number: companyRegistrationNumber,
+    });
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
