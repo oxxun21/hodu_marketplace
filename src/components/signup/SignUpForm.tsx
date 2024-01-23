@@ -5,7 +5,6 @@ import icon_password_ok from "../../assets/icon-check-on.svg";
 import { companyRegistrationNumberValid, signupBuyerAPI, signupSellerAPI, usernameValid } from "../../api/sign";
 import { useNavigate } from "react-router-dom";
 
-// TODO: 계정 검증, 사업자등록번호 검증
 export const SignUpForm = ({ loginType }: { loginType: string }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
@@ -20,6 +19,8 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
   const [errorMsg, setErrorMsg] = useState("");
   const [errorUserMsg, setErrorUserMsg] = useState("");
   const [errorCompanyMsg, setErrorCompanyMsg] = useState("");
+  const [isCheckedUser, setIsCheckedUser] = useState(false);
+  const [isCheckedCompany, setIsCheckedCompany] = useState(false);
 
   const validatePassword = (password: string): boolean => {
     const passwordRegexp = /^(?=.*[a-z])(?=.*\d)[a-z\d]{8,}$/i;
@@ -37,9 +38,10 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
       !validatePassword(password) &&
       !validatePasswordCheck(passwordCheck) &&
       name &&
+      isCheckedUser &&
       phoneNumber &&
       isCheckboxChecked &&
-      (loginType === "BUYER" || (companyRegistrationNumber && storeName))
+      (loginType === "BUYER" || (companyRegistrationNumber && storeName && isCheckedCompany))
     ) {
       setIsFormValid(true);
     } else {
@@ -57,29 +59,39 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
     loginType,
   ]);
 
-  const handleValidationResponse = (response: any, setErrorMsg: (msg: string) => void) => {
+  const handleValidationResponse = (
+    response: any,
+    setErrorMsg: (msg: string) => void,
+    setIsChecked: (check: boolean) => void
+  ) => {
     const responseData = (response as any)?.response?.data || (response as any)?.data;
 
     if (responseData) {
-      const successMsg = responseData.Success;
-      const failMsg = responseData.FAIL_Message;
-
-      if (failMsg) {
-        setErrorMsg(failMsg);
-      } else if (successMsg) {
-        setErrorMsg(successMsg);
+      if (responseData.FAIL_Message) {
+        setErrorMsg(responseData.FAIL_Message);
+        setIsChecked(false);
+      } else if (responseData.Success) {
+        setIsChecked(true);
       }
     }
   };
 
   const handleUsernameValid = async (username: string) => {
     const response = await usernameValid(username);
-    handleValidationResponse(response, setErrorUserMsg);
+    handleValidationResponse(response, setErrorUserMsg, setIsCheckedUser);
   };
 
   const handleCompanyNumberValid = async (companyRegistrationNumber: string) => {
-    const response = await companyRegistrationNumberValid(companyRegistrationNumber);
-    handleValidationResponse(response, setErrorCompanyMsg);
+    if (companyRegistrationNumber.length === 10 && !isNaN(Number(companyRegistrationNumber))) {
+      const response = await companyRegistrationNumberValid(companyRegistrationNumber);
+      handleValidationResponse(response, setErrorCompanyMsg, setIsCheckedCompany);
+      console.log(response);
+      if ((response as any).status === 202) {
+        setErrorCompanyMsg("");
+      }
+    } else {
+      setErrorCompanyMsg("사업자등록번호를 다시 확인해주세요.");
+    }
   };
 
   const handleResponse = async (response: any) => {
@@ -134,7 +146,9 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
               onChange={e => setUsername(e.target.value)}
             />
           </label>
-          <button onClick={() => handleUsernameValid(username)}>중복확인</button>
+          <button disabled={isCheckedUser} onClick={() => handleUsernameValid(username)}>
+            중복확인
+          </button>
         </NeedToChackBox>
         {errorUserMsg && <SignupError>{errorUserMsg}</SignupError>}
         <label htmlFor="password">
@@ -195,7 +209,9 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
                 onChange={e => setCompanyRegistrationNumber(e.target.value)}
               />
             </label>
-            <button onClick={() => handleCompanyNumberValid(companyRegistrationNumber)}>인증</button>
+            <button disabled={isCheckedCompany} onClick={() => handleCompanyNumberValid(companyRegistrationNumber)}>
+              인증
+            </button>
           </NeedToChackBox>
           {errorCompanyMsg && <SignupError>{errorCompanyMsg}</SignupError>}
           <label htmlFor="storeName">
