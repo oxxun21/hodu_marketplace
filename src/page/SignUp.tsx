@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "@emotion/styled";
 import logo from "../assets/Logo-hodu.svg";
 import { SignUpForm } from "../components/signup/SignUpForm";
+import { Link } from "react-router-dom";
 
 export const SignUp = () => {
   const [loginType, setLoginType] = useState("BUYER");
@@ -11,7 +12,9 @@ export const SignUp = () => {
   return (
     <SignInMain>
       <h1>
-        <img src={logo} alt="HODU 로고" />
+        <Link to="/">
+          <img src={logo} alt="HODU 로고" />
+        </Link>
       </h1>
       <SignFormContain>
         <SignUpButtonBox>
@@ -36,8 +39,12 @@ const SignInMain = styled.main`
 
   & > h1 {
     margin: 100px 0;
-    & > img {
-      width: 13rem;
+    & > a {
+      display: block;
+      height: 100%;
+      & > img {
+        width: 13rem;
+      }
     }
   }
 `;

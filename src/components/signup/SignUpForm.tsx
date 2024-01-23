@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import icon_password from "../../assets/icon-check-off.svg";
 import icon_password_ok from "../../assets/icon-check-on.svg";
-import { signupBuyerAPI, signupSellerAPI } from "../../api/sign";
+import { companyRegistrationNumberValid, signupBuyerAPI, signupSellerAPI, usernameValid } from "../../api/sign";
 import { useNavigate } from "react-router-dom";
 
+// TODO: 계정 검증, 사업자등록번호 검증
 export const SignUpForm = ({ loginType }: { loginType: string }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
@@ -17,6 +18,8 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
   const [isCheckboxChecked, setIsCheckboxChecked] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [errorUserMsg, setErrorUserMsg] = useState("");
+  const [errorCompanyMsg, setErrorCompanyMsg] = useState("");
 
   const validatePassword = (password: string): boolean => {
     const passwordRegexp = /^(?=.*[a-z])(?=.*\d)[a-z\d]{8,}$/i;
@@ -54,6 +57,31 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
     loginType,
   ]);
 
+  const handleValidationResponse = (response: any, setErrorMsg: (msg: string) => void) => {
+    const responseData = (response as any)?.response?.data || (response as any)?.data;
+
+    if (responseData) {
+      const successMsg = responseData.Success;
+      const failMsg = responseData.FAIL_Message;
+
+      if (failMsg) {
+        setErrorMsg(failMsg);
+      } else if (successMsg) {
+        setErrorMsg(successMsg);
+      }
+    }
+  };
+
+  const handleUsernameValid = async (username: string) => {
+    const response = await usernameValid(username);
+    handleValidationResponse(response, setErrorUserMsg);
+  };
+
+  const handleCompanyNumberValid = async (companyRegistrationNumber: string) => {
+    const response = await companyRegistrationNumberValid(companyRegistrationNumber);
+    handleValidationResponse(response, setErrorCompanyMsg);
+  };
+
   const handleResponse = async (response: any) => {
     if (response.status === 201) {
       navigate("/signin");
@@ -63,6 +91,7 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
           setErrorMsg(`※ ${key}: ${response.response.data[key]}`);
         }
       }
+      setIsFormValid(prev => !prev);
     }
   };
 
@@ -105,8 +134,9 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
               onChange={e => setUsername(e.target.value)}
             />
           </label>
-          <button>중복확인</button>
+          <button onClick={() => handleUsernameValid(username)}>중복확인</button>
         </NeedToChackBox>
+        {errorUserMsg && <SignupError>{errorUserMsg}</SignupError>}
         <label htmlFor="password">
           비밀번호
           <input
@@ -165,8 +195,9 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
                 onChange={e => setCompanyRegistrationNumber(e.target.value)}
               />
             </label>
-            <button>인증</button>
+            <button onClick={() => handleCompanyNumberValid(companyRegistrationNumber)}>인증</button>
           </NeedToChackBox>
+          {errorCompanyMsg && <SignupError>{errorCompanyMsg}</SignupError>}
           <label htmlFor="storeName">
             스토어 이름
             <input
@@ -179,8 +210,8 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
           </label>
         </SignUpInputBox>
       )}
-      {errorMsg && <SignupError>{errorMsg}</SignupError>}
       <AgreeBox>
+        {errorMsg && <SignupError>{errorMsg}</SignupError>}
         <input type="checkbox" id="check" onChange={e => setIsCheckboxChecked(e.target.checked)} />
         <label htmlFor="check" />
         <span>
@@ -309,4 +340,5 @@ const NeedToChackBox = styled.div`
 const SignupError = styled.p`
   color: #ff0000;
   font-size: 0.875rem;
+  margin-bottom: 1rem;
 `;
