@@ -6,6 +6,7 @@ import { signinAPI } from "../api/sign";
 import { getLoginCookie, setLoginCookie } from "../utils/loginCookie";
 import { instance } from "../api/instance";
 
+// 이거의 위치는 instance 안에 있어야하지 않나?
 const interceptorHeader = () => {
   instance.interceptors.request.use(config => {
     config.headers.Authorization = `Bearer ${getLoginCookie()}`;

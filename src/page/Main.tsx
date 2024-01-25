@@ -43,6 +43,7 @@ export const Main = () => {
                 return (
                   <Card
                     key={product.product_id}
+                    id={product.product_id}
                     image={product.image}
                     store_name={product.store_name}
                     product_name={product.product_name}
