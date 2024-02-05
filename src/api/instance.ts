@@ -10,6 +10,11 @@ export const instance = axios.create({
   },
 });
 
+instance.interceptors.request.use(config => {
+  config.headers.Authorization = `Bearer ${getLoginCookie()}`;
+  return config;
+});
+
 export const unauthInstance = axios.create({
   baseURL: BASE_URL,
   headers: {

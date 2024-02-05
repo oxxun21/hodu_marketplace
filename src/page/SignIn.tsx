@@ -3,16 +3,7 @@ import logo from "../assets/Logo-hodu.svg";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "@emotion/styled";
 import { signinAPI } from "../api/sign";
-import { getLoginCookie, setLoginCookie } from "../utils/loginCookie";
-import { instance } from "../api/instance";
-
-// 이거의 위치는 instance 안에 있어야하지 않나?
-const interceptorHeader = () => {
-  instance.interceptors.request.use(config => {
-    config.headers.Authorization = `Bearer ${getLoginCookie()}`;
-    return config;
-  });
-};
+import { setLoginCookie } from "../utils/loginCookie";
 
 export const SignIn = () => {
   const [username, setUsername] = useState("");
@@ -38,7 +29,6 @@ export const SignIn = () => {
     } else {
       const { token } = (response as any).data;
       setLoginCookie(token, { path: "/" });
-      interceptorHeader();
       navigate("/");
     }
   };

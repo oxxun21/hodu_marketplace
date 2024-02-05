@@ -23,7 +23,7 @@ export const Main = () => {
     (async () => {
       try {
         const response = await productAllGET();
-        setProductList(response);
+        // setProductList(response);
       } catch (error) {
         throw new Error();
       }
@@ -35,7 +35,7 @@ export const Main = () => {
   return (
     <Layout>
       <Banner />
-      {productList === null || productList.length === 0 ? null : (
+      {/* {productList === null || productList.length === 0 ? null : (
         <ProductsListSection>
           <ul>
             <Masonry
@@ -58,7 +58,7 @@ export const Main = () => {
             </Masonry>
           </ul>
         </ProductsListSection>
-      )}
+      )} */}
     </Layout>
   );
 };
