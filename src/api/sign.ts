@@ -6,7 +6,7 @@ export const signinAPI = async (userInfo: SignIn_I) => {
     const response = await instance.post("/accounts/login/", userInfo);
     return response;
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
@@ -15,7 +15,7 @@ export const signupBuyerAPI = async (userInfo: SignUpBuyer_I) => {
     const response = await unauthInstance.post("/accounts/signup/", userInfo);
     return response;
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
@@ -24,7 +24,7 @@ export const signupSellerAPI = async (userInfo: SignUpSeller_I) => {
     const response = await unauthInstance.post("/accounts/signup_seller/", userInfo);
     return response;
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
@@ -33,7 +33,7 @@ export const usernameValid = async (username: string) => {
     const response = await unauthInstance.post("/accounts/signup/valid/username/", { username: username });
     return response;
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
@@ -44,6 +44,6 @@ export const companyRegistrationNumberValid = async (companyRegistrationNumber: 
     });
     return response;
   } catch (error) {
-    return error;
+    throw error;
   }
 };

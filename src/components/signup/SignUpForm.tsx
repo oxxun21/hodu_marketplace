@@ -14,11 +14,14 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [companyRegistrationNumber, setCompanyRegistrationNumber] = useState("");
   const [storeName, setStoreName] = useState("");
+
   const [isCheckboxChecked, setIsCheckboxChecked] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+
+  const [errorMsg, setErrorMsg] = useState<string[]>([]);
   const [errorUserMsg, setErrorUserMsg] = useState("");
   const [errorCompanyMsg, setErrorCompanyMsg] = useState("");
+
   const [isCheckedUser, setIsCheckedUser] = useState(false);
   const [isCheckedCompany, setIsCheckedCompany] = useState(false);
 
@@ -64,6 +67,13 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
     setErrorMsg: (msg: string) => void,
     setIsChecked: (check: boolean) => void
   ) => {
+    console.log(response);
+    try {
+      setIsChecked(true);
+    } catch (error: any) {
+      setErrorMsg(error.response.data.FAIL_Message);
+      setIsChecked(false);
+    }
     const responseData = (response as any)?.response?.data || (response as any)?.data;
 
     if (responseData) {
@@ -71,45 +81,53 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
         setErrorMsg(responseData.FAIL_Message);
         setIsChecked(false);
       } else if (responseData.Success) {
-        setIsChecked(true);
       }
     }
   };
 
   const handleUsernameValid = async (username: string) => {
+    // try {
+    //   const response = await usernameValid(username);
+    //   setIsChecked(true);
+    // } catch (error) {
+    //   setErrorMsg(error.response.data.FAIL_Message);
+    //   setIsChecked(false);
+    // }
     const response = await usernameValid(username);
     handleValidationResponse(response, setErrorUserMsg, setIsCheckedUser);
   };
 
   const handleCompanyNumberValid = async (companyRegistrationNumber: string) => {
     if (companyRegistrationNumber.length === 10 && !isNaN(Number(companyRegistrationNumber))) {
-      const response = await companyRegistrationNumberValid(companyRegistrationNumber);
-      handleValidationResponse(response, setErrorCompanyMsg, setIsCheckedCompany);
-      console.log(response);
-      if ((response as any).status === 202) {
-        setErrorCompanyMsg("");
-      }
-    } else {
-      setErrorCompanyMsg("사업자등록번호를 다시 확인해주세요.");
-    }
-  };
-
-  const handleResponse = async (response: any) => {
-    if (response.status === 201) {
-      navigate("/signin");
-    } else {
-      if (response.response.data) {
-        for (const key in response.response.data) {
-          setErrorMsg(`※ ${key}: ${response.response.data[key]}`);
+      try {
+        const response = await companyRegistrationNumberValid(companyRegistrationNumber);
+        if ((response as any).status === 202) {
+          setErrorCompanyMsg("");
+          setIsCheckedCompany(true);
         }
+      } catch (error: any) {
+        // TODO: 수정 필요
+        console.log(error);
+
+        setErrorMsg(error.response.data.FAIL_Message);
+        setErrorCompanyMsg("사업자등록번호를 다시 확인해주세요.");
+        setIsCheckedCompany(false);
       }
-      setIsFormValid(prev => !prev);
     }
+    //   handleValidationResponse(response, setErrorCompanyMsg, setIsCheckedCompany);
+    //   console.log(response);
+    //   if ((response as any).status === 202) {
+    //     setErrorCompanyMsg("");
+    //   }
+    // } else {
+    //   setErrorCompanyMsg("사업자등록번호를 다시 확인해주세요.");
+    // }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     let response;
+    let errorMessages = [];
     const userInfo = {
       username,
       password,
@@ -118,17 +136,35 @@ export const SignUpForm = ({ loginType }: { loginType: string }) => {
       name,
     };
     if (loginType === "BUYER") {
-      response = await signupBuyerAPI(userInfo);
+      try {
+        response = await signupBuyerAPI(userInfo);
+        navigate("/signin");
+      } catch (error: any) {
+        if (error.response.data) {
+          for (const key in error.response.data) {
+            errorMessages.push(`※ ${key}: ${error.response.data[key]}\n`);
+          }
+          setErrorMsg(errorMessages);
+        }
+        setIsFormValid(prev => !prev);
+      }
     } else if (loginType === "SELLER") {
-      response = await signupSellerAPI({
-        ...userInfo,
-        company_registration_number: companyRegistrationNumber,
-        store_name: storeName,
-      });
-    }
-
-    if (response) {
-      await handleResponse(response);
+      try {
+        response = await signupSellerAPI({
+          ...userInfo,
+          company_registration_number: companyRegistrationNumber,
+          store_name: storeName,
+        });
+        navigate("/signin");
+      } catch (error: any) {
+        if (error.response.data) {
+          for (const key in error.response.data) {
+            errorMessages.push(`※ ${key}: ${error.response.data[key]}\n`);
+          }
+          setErrorMsg(errorMessages);
+        }
+        setIsFormValid(prev => !prev);
+      }
     }
   };
 
@@ -357,4 +393,6 @@ const SignupError = styled.p`
   color: #ff0000;
   font-size: 0.875rem;
   margin-bottom: 1rem;
+  white-space: pre-line;
+  line-height: 1.5;
 `;

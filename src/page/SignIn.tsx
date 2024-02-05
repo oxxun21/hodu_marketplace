@@ -18,18 +18,17 @@ export const SignIn = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await signinAPI({
-      username,
-      password,
-      login_type: loginType,
-    });
-
-    if ((response as any).status !== 200) {
-      setErrorMsg((response as any).response.data.FAIL_Message);
-    } else {
+    try {
+      const response = await signinAPI({
+        username,
+        password,
+        login_type: loginType,
+      });
       const { token } = (response as any).data;
       setLoginCookie(token, { path: "/" });
       navigate("/");
+    } catch (error: any) {
+      setErrorMsg(error.response.data.FAIL_Message);
     }
   };
 
