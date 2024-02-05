@@ -3,43 +3,32 @@ import logo from "../assets/Logo-hodu.svg";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "@emotion/styled";
 import { signinAPI } from "../api/sign";
-import { getLoginCookie, setLoginCookie } from "../utils/loginCookie";
-import { instance } from "../api/instance";
-
-// 이거의 위치는 instance 안에 있어야하지 않나?
-const interceptorHeader = () => {
-  instance.interceptors.request.use(config => {
-    config.headers.Authorization = `Bearer ${getLoginCookie()}`;
-    return config;
-  });
-};
+import { setLoginCookie } from "../utils/loginCookie";
 
 export const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loginType, setLoginType] = useState("BUYER");
+  const [loginType, setLoginType] = useState<"BUYER" | "SELLER">("BUYER");
   const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
 
-  const handleButtonClick = (buttonType: string) => {
+  const handleButtonClick = (buttonType: "BUYER" | "SELLER") => {
     setLoginType(buttonType);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await signinAPI({
-      username,
-      password,
-      login_type: loginType,
-    });
-
-    if ((response as any).status !== 200) {
-      setErrorMsg((response as any).response.data.FAIL_Message);
-    } else {
+    try {
+      const response = await signinAPI({
+        username,
+        password,
+        login_type: loginType,
+      });
       const { token } = (response as any).data;
       setLoginCookie(token, { path: "/" });
-      interceptorHeader();
       navigate("/");
+    } catch (error: any) {
+      setErrorMsg(error.response.data.FAIL_Message);
     }
   };
 

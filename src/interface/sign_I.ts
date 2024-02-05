@@ -1,7 +1,7 @@
 export interface SignIn_I {
   username: string;
   password: string;
-  login_type: string;
+  login_type: "BUYER" | "SELLER";
 }
 
 export interface SignUpBuyer_I {

@@ -7,7 +7,7 @@ import styled from "@emotion/styled";
 
 export const Products = () => {
   const { id } = useParams();
-  const [productData, setProductData] = useState<ProductInfo_I | any>();
+  const [productData, setProductData] = useState<ProductInfo_I | undefined>();
 
   useEffect(() => {
     (async () => {
@@ -37,7 +37,7 @@ export const Products = () => {
                   {productData.price.toLocaleString()}
                   <span> 원</span>
                 </p>
-                {productData.product_info && <span>{productData.product_info}</span>}
+                {productData.products_info && <span>{productData.products_info}</span>}
               </ProductInfoTitle>
               <ProductInfoCount>
                 <p>택배배송 &#47; 무료배송</p>
