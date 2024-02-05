@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { ProductAllList_I } from "../interface/product_I";
+import { ProductAllListResult, ProductAllList_I } from "../interface/product_I";
 import { productAllGET } from "../api/product";
 import styled from "@emotion/styled";
 import Card from "../components/main/Card";
@@ -14,20 +14,24 @@ const breakpointMasonryObj = {
   450: 1,
 };
 
+export type ProductListArray = ProductAllList_I[];
+
 export const Main = () => {
-  const [productList, setProductList] = useState<ProductAllList_I[] | null>(null);
+  const [productList, setProductList] = useState<ProductAllListResult | undefined>();
 
   useEffect(() => {
-    const productData = async () => {
+    (async () => {
       try {
-        const res = await productAllGET();
-        setProductList(res.results);
+        const response = await productAllGET();
+        setProductList(response);
       } catch (error) {
-        console.log(error);
+        throw new Error();
       }
-    };
-    productData();
+    })();
   }, []);
+
+  console.log(productList);
+
   return (
     <Layout>
       <Banner />

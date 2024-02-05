@@ -17,11 +17,11 @@ const interceptorHeader = () => {
 export const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loginType, setLoginType] = useState("BUYER");
+  const [loginType, setLoginType] = useState<"BUYER" | "SELLER">("BUYER");
   const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
 
-  const handleButtonClick = (buttonType: string) => {
+  const handleButtonClick = (buttonType: "BUYER" | "SELLER") => {
     setLoginType(buttonType);
   };
 

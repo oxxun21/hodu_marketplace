@@ -11,6 +11,10 @@ export interface ProductAllList_I {
   products_info: string;
 }
 
+export interface ProductAllListResult {
+  results: ProductAllList_I[];
+}
+
 export interface ProductInfo_I {
   product_id: number;
   created_at: string;

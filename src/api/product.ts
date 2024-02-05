@@ -1,13 +1,13 @@
 import { AxiosResponse } from "axios";
 import { unauthInstance } from "./instance";
-import { ProductInfo_I } from "../interface/product_I";
+import { ProductAllListResult, ProductAllList_I, ProductInfo_I } from "../interface/product_I";
 
-export const productAllGET = async () => {
+export const productAllGET = async (): Promise<AxiosResponse<ProductAllListResult[]>> => {
   try {
     const response = await unauthInstance.get("/products/");
     return response.data;
   } catch (error) {
-    return error;
+    throw new Error();
   }
 };
 
